@@ -19,6 +19,11 @@ const contactSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     },
+    mobile: {
+      type: String,
+      trim: true,
+      maxlength: [15, "Mobile number cannot exceed 15 characters"],
+    },
     subject: {
       type: String,
       trim: true,

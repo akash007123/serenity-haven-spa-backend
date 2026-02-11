@@ -12,11 +12,12 @@ const emailService = require("../utils/emailService");
  */
 exports.createContact = async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body;
+    const { name, email, mobile, subject, message } = req.body;
 
     const contact = new Contact({
       name,
       email,
+      mobile,
       subject,
       message,
     });
