@@ -8,7 +8,7 @@ const fs = require("fs");
 const contactRoutes = require("./routes/contactRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
-const newsletterRoutes = require("./routes/authRoutes");
+const newsletterRoutes = require("./routes/newsletterRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
