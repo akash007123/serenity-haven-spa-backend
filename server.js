@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 
 const contactRoutes = require("./routes/contactRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const newsletterRoutes = require("./routes/newsletterRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +40,8 @@ app.get("/api/health", (req, res) => {
 // API Routes
 app.use("/api/contacts", contactRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/newsletter", newsletterRoutes);
 
 // 404 handler
 app.use((req, res) => {
