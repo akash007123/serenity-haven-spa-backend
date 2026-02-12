@@ -231,29 +231,99 @@ const getMe = async (req, res) => {
   }
 };
 
-// Update user profile
+// Update user profile (all fields including password and profile pic)
 const updateProfile = async (req, res) => {
   try {
-    const { name, email, mobile, address, dateOfBirth, gender } = req.body;
+    const { 
+      name, 
+      email, 
+      mobile, 
+      address, 
+      dateOfBirth, 
+      gender,
+      currentPassword,
+      newPassword,
+      confirmPassword
+    } = req.body;
+
+    // Build update object
+    const updateData = {};
+    
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (mobile) updateData.mobile = mobile;
+    if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
+    if (gender) updateData.gender = gender;
+    
+    // Handle address
+    if (address || address === '') {
+      updateData.address = {
+        street: req.body.street || '',
+        city: req.body.city || '',
+        state: req.body.state || '',
+        country: req.body.country || '',
+        postalCode: req.body.postalCode || ''
+      };
+    }
+
+    // Handle profile picture upload
+    if (req.file) {
+      updateData.profilePic = '/uploads/profile-pics/' + req.file.filename;
+    }
+
+    // Handle password change
+    if (currentPassword && newPassword) {
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'New passwords do not match'
+        });
+      }
+
+      // Get user with password
+      const userWithPassword = await User.findById(req.user.id).select('+password');
+      
+      if (!userWithPassword) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Verify current password
+      const isMatch = await userWithPassword.comparePassword(currentPassword);
+      
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: 'Current password is incorrect'
+        });
+      }
+
+      // Validate new password strength
+      if (newPassword.length < 8) {
+        return res.status(400).json({
+          success: false,
+          message: 'New password must be at least 8 characters'
+        });
+      }
+
+      updateData.password = newPassword;
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      {
-        name,
-        email,
-        mobile,
-        address,
-        dateOfBirth,
-        gender
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 
     res.json({
       success: true,
+      message: 'Profile updated successfully',
       data: user
     });
   } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({
       success: false,
       message: 'Error updating profile',
@@ -262,4 +332,68 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { upload, register, login, logout, getMe, updateProfile };
+// Update password only
+const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide current password and new password'
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New passwords do not match'
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 8 characters'
+      });
+    }
+
+    // Get user with password
+    const user = await User.findById(req.user.id).select('+password');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Update password (will be hashed by pre-save middleware)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully'
+    });
+  } catch (error) {
+    console.error('Update password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating password',
+      error: error.message
+    });
+  }
+};
+
+module.exports = { upload, register, login, logout, getMe, updateProfile, updatePassword };

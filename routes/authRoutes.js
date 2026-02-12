@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { upload, register, login, logout, getMe, updateProfile } = require('../controllers/authController');
+const { upload, register, login, logout, getMe, updateProfile, updatePassword } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
 // Public routes
@@ -10,6 +10,7 @@ router.post('/login', login);
 // Protected routes
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
-router.put('/profile', protect, updateProfile);
+router.put('/profile', protect, upload.single('profilePic'), updateProfile);
+router.put('/password', protect, updatePassword);
 
 module.exports = router;
