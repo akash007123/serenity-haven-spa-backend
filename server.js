@@ -21,12 +21,52 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// CORS - Allow all origins
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || "*",
+// CORS - Configure allowed origins
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:8080',
+      'http://localhost:5173',
+      'http://127.0.0.1:8080',
+      'http://127.0.0.1:5173',
+      'https://tripod-wellness.netlify.app/',
+      'https://tripod-wellness.netlify.app',
+      'https://tripod-wellness.netlify.app/about',
+      'https://tripod-wellness.netlify.app/services',
+      'https://tripod-wellness.netlify.app/gallery',
+      'https://tripod-wellness.netlify.app/booking',
+      'https://tripod-wellness.netlify.app/contact',
+      'https://tripod-wellness.netlify.app/faq',
+      'https://tripod-wellness.netlify.app/admin',
+      'https://tripod-wellness.netlify.app/admin/bookings',
+      'https://tripod-wellness.netlify.app/admin/contacts',
+      'https://tripod-wellness.netlify.app/admin/subscribers',
+      'https://tripod-wellness.netlify.app/admin/services',
+      'https://tripod-wellness.netlify.app/admin/therapists',
+      'https://tripod-wellness.netlify.app/admin/analytics',
+      'https://tripod-wellness.netlify.app/admin/settings'
+    ];
+    
+    // In development, allow all localhost origins
+    if (process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
-}));
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));

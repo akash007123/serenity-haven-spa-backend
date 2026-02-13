@@ -100,7 +100,8 @@ exports.sendAdminNotification = async (type, data) => {
         <p><strong>Service:</strong> ${data.service}</p>
         <p><strong>Date:</strong> ${data.date}</p>
         <p><strong>Time:</strong> ${data.time}</p>
-        <p><strong>Notes:</strong> ${data.notes || "None"}</p>
+        <p><strong>Message:</strong></p>
+        <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${data.message}</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
         <p style="color: #888; font-size: 12px;">
           Sent from Serenity Spa Booking Form
